@@ -37,7 +37,7 @@ All models provided operate as public goods. There is no fee associated with the
 In the initial version of this repository there is a simple escrow contract that is multistep. The flow goes:
 
 1. A `maker` makes an order by depositing the tokens while defining the tokens they will receive from the `taker`.
-2. A `taker` fills and order by `taking` the order and depositing the counterparty tokens defined by the `maker`.
+2. A `taker` fills an order by `taking` the order and depositing the counterparty tokens defined by the `maker`.
 3. The `maker` and `taker` can withdraw their assets without being exposed to any royalty mechanism.
 
 ### The Single-Wrap Token Model
