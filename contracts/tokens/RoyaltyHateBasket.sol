@@ -8,8 +8,9 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import {RoyaltyHateTransfers} from "../lib/RoyaltyHateTransfers.sol";
 import {ERC721} from "solady/src/tokens/ERC721.sol";
+import {ReentrancyGuard} from "solady/src/utils/ReentrancyGuard.sol";
 
-contract RoyaltyHateBasket is RoyaltyHateTransfers, ERC721 {
+contract RoyaltyHateBasket is RoyaltyHateTransfers, ERC721, ReentrancyGuard {
     using Strings for uint256;
 
     /// @notice The next token id to mint.
@@ -26,7 +27,7 @@ contract RoyaltyHateBasket is RoyaltyHateTransfers, ERC721 {
     function make(
         address $receiver,
         RoyaltyHateHelpers.RoyaltyHateDetails memory $hateDetails
-    ) external payable {
+    ) external payable nonReentrant {
         /// @dev Make sure that the value is correct.
         require(
             msg.value == $hateDetails.value,
@@ -47,7 +48,7 @@ contract RoyaltyHateBasket is RoyaltyHateTransfers, ERC721 {
     /// @dev Unwrap the tokens and take the assets.
     /// @param $receiver The receiver of the token.
     /// @param $tokenId The token id of the basket token to unwrap.
-    function take(address $receiver, uint256 $tokenId) external {
+    function take(address $receiver, uint256 $tokenId) external nonReentrant {
         /// @dev Burn the token being unwrapped.
         _burn(msg.sender, $tokenId);
 
