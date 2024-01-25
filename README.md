@@ -27,7 +27,7 @@ If you are looking into the development of a "royalty enforcing" blockchain and 
 
 ## How it Works
 
-All models provided operate as public goods. There is no fee associated with the use of the protocol for either the `maker` or `taker`. Now, a `maker` and `taker` can freely and securely transcact without the concern of taxes (royalties) eating away at the value of the economy and the next time someone claims to enforce royalties, this repository will contain every major method to prove them wrong.
+All models provided operate as public goods. There is no fee associated with the use of the protocol for either the `maker` or `taker`. Now, a `maker` and `taker` can freely and securely transact without the concern of royalties eating away at the value of the economy. The next time someone claims to enforce royalties, this repository will contain every major method to prove them wrong.
 
 > [!CAUTION]
 > Under no circumstances should you deploy this contract yourself. Please give Rari an opportunity to correct their claim and issues that exist in the model. This code is offered without guarantee, assurance, or personal liability for actions you choose to take whether it be deployment or interaction. This should only be used for education purposes.
@@ -36,9 +36,9 @@ All models provided operate as public goods. There is no fee associated with the
 
 In the initial version of this repository there is a simple escrow contract that is multistep. The flow goes:
 
-1. A `maker` makes an order by depositing the tokens they are offering for a trade while defining the tokens it will receive from the `taker`.
-2. A `taker` flags interest by `taking` the order and depositing the counterparty tokens defined by the `maker` in step 1.
-3. The `maker` and `taker` can withdraw their assets and go on with their without being exposed to any thieving royalty mechanism.
+1. A `maker` makes an order by depositing the tokens while defining the tokens they will receive from the `taker`.
+2. A `taker` fills and order by `taking` the order and depositing the counterparty tokens defined by the `maker`.
+3. The `maker` and `taker` can withdraw their assets without being exposed to any royalty mechanism.
 
 ### The Single-Wrap Token Model
 
@@ -50,10 +50,10 @@ Following this, I had the realization that you do not even need a multistep escr
 
 ### The Multi-Wrap Token Model
 
-Once again, following the implementation of the single token model it dawned on me that there is an even easier method. Just wrap a basket of assets into a single `ERC721` that of course, does not have royalties. This way, when any party interacts with the token, ownership of multiple assets changes at once without the underlying ownership changing; thus, no theiving royalties to pay!
+Once again, following the implementation of the single token model it dawned on me that there is an even easier method. Just wrap a basket of assets into a single `ERC721` that of course, does not have royalties. This way, when any party interacts with the token, ownership of multiple assets changes at once without the underlying ownership changing; thus, no royalties to pay!
 
 In practice, this results in an experience of:
 
-1. A `maker` and/or `taker` deposit their assets into the multi-wrapper and receive a single `ERC721` that contains all the assets being traded.
+1. A `maker` and/or `taker` deposit their assets into the multi-wrapper and receive a single `ERC721`.
 2. The basket `ERC721` trades hands.
 3. A `maker` and/or `taker` unwraps the token at no cost and without exposure to royalties.
