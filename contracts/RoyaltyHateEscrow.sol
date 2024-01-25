@@ -33,11 +33,8 @@ contract RoyaltyHateEscrow is
             "RoyaltyHate: hateDetails.expiration <= block.timestamp"
         );
 
-        /// @dev Recover the sender from the multicaller, otherwise use the sender.
-        address sender = RoyaltyHateHelpers.sender();
-
         /// @dev Make sure that the nonce is correct.
-        uint32 nonce = addressToNonce[sender]++;
+        uint32 nonce = addressToNonce[msg.sender]++;
         require(
             $hateDetails.nonce == nonce,
             "RoyaltyHate: hateDetails.nonce != nonce"
@@ -58,22 +55,22 @@ contract RoyaltyHateEscrow is
 
         /// @dev Transfer all of the assets to this contract
         /// @notice (ERC20 & ERC721 & ERC1155).
-        _transferFrom(sender, address(this), $hateDetails.makerDetails);
+        _transferFrom(msg.sender, address(this), $hateDetails.makerDetails);
 
         /// @dev Record the details of the hate.
-        addressToNonceToHateDetails[sender][nonce] = $hateDetails;
+        addressToNonceToHateDetails[msg.sender][nonce] = $hateDetails;
 
         /// @dev Announce the event for the indexer.
-        emit RoyaltyHateHelpers.MakeRoyaltyHate(sender, $hateDetails);
+        emit RoyaltyHateHelpers.MakeRoyaltyHate(msg.sender, $hateDetails);
     }
 
     /// @notice Allows the maker to cancel an order that is being made.
     /// @param $nonce The nonce of the maker.
     function cancel(uint32 $nonce) external {
         RoyaltyHateHelpers.MakerRoyaltyHateDetails
-            storage hateDetails = addressToNonceToHateDetails[
-                RoyaltyHateHelpers.sender()
-            ][$nonce];
+            storage hateDetails = addressToNonceToHateDetails[msg.sender][
+                $nonce
+            ];
 
         /// @dev Make sure that the hate is not expired.
         require(
@@ -90,14 +87,11 @@ contract RoyaltyHateEscrow is
         /// @dev Mark the order as cancelled.
         hateDetails.state = RoyaltyHateHelpers.RoyaltyHateState.cancelled;
 
-        /// @dev Recover the sender from the multicaller, otherwise use the sender.
-        address sender = RoyaltyHateHelpers.sender();
-
         /// @dev Transfer the assets back to the maker.
         uint256 value = hateDetails.makerDetails.value;
-        if (value > 0) _transferETH(sender, value);
+        if (value > 0) _transferETH(msg.sender, value);
 
-        _transferFrom(address(this), sender, hateDetails.makerDetails);
+        _transferFrom(address(this), msg.sender, hateDetails.makerDetails);
     }
 
     /// @notice Allows the taker to take an order that is being made.
@@ -110,13 +104,10 @@ contract RoyaltyHateEscrow is
         RoyaltyHateHelpers.MakerRoyaltyHateDetails
             storage hateDetails = addressToNonceToHateDetails[$maker][$nonce];
 
-        /// @dev Recover the sender from the multicaller, otherwise use the sender.
-        address sender = RoyaltyHateHelpers.sender();
-
         /// @dev Make sure the taker is valid.
         require(
-            hateDetails.taker == sender || hateDetails.taker == address(0),
-            "RoyaltyHate: hateDetails.taker != sender && hateDetails.taker != address(0)"
+            hateDetails.taker == msg.sender || hateDetails.taker == address(0),
+            "RoyaltyHate: hateDetails.taker != msg.sender && hateDetails.taker != address(0)"
         );
 
         /// @dev Make sure that the hate is not expired.
@@ -138,15 +129,19 @@ contract RoyaltyHateEscrow is
         );
 
         /// @dev Record the details of the hate.
-        hateDetails.taker = sender;
+        hateDetails.taker = msg.sender;
         hateDetails.state = RoyaltyHateHelpers.RoyaltyHateState.taking;
 
         /// @dev Transfer all of the assets to this contract.
         /// @notice (ERC20 & ERC721 & ERC1155).
-        _transferFrom(sender, address(this), hateDetails.takerDetails);
+        _transferFrom(msg.sender, address(this), hateDetails.takerDetails);
 
         /// @dev Announce the event for the indexer.
-        emit RoyaltyHateHelpers.TakingRoyaltyHate($maker, sender, hateDetails);
+        emit RoyaltyHateHelpers.TakingRoyaltyHate(
+            $maker,
+            msg.sender,
+            hateDetails
+        );
     }
 
     /// @notice Fulfills an order that is being taken and transfers assets where they belong.
@@ -171,16 +166,27 @@ contract RoyaltyHateEscrow is
         /// @dev Mark the order as taken.
         hateDetails.state = RoyaltyHateHelpers.RoyaltyHateState.taken;
 
+        uint256 value = hateDetails.takerDetails.value;
+
         /// @dev Transfer the traded assets to the maker.
-        _transferETH($maker, hateDetails.takerDetails.value);
+        if (value > 0) _transferETH($maker, value);
         _transferFrom(address(this), $maker, hateDetails.takerDetails);
 
+        value = hateDetails.makerDetails.value;
+
         /// @dev Transfer the traded assets to the taker.
-        _transferETH(hateDetails.taker, hateDetails.makerDetails.value);
+        if (value > 0) _transferETH(hateDetails.taker, value);
         _transferFrom(
             address(this),
             hateDetails.taker,
             hateDetails.makerDetails
+        );
+
+        /// @dev Announce the event for the indexer.
+        emit RoyaltyHateHelpers.TakeRoyaltyHate(
+            $maker,
+            hateDetails.taker,
+            hateDetails
         );
     }
 
@@ -209,26 +215,35 @@ contract RoyaltyHateEscrow is
                 $nonce
             ].recoveryDetails;
 
-        /// @dev Recover the sender from the multicaller, otherwise use the sender.
-        address sender = RoyaltyHateHelpers.sender();
+        /// @dev Allow a maker to recover their assets.
+        if (msg.sender == $maker) {
+            /// @dev Make sure the maker hasn't already recovered.
+            require(
+                hateRecoveryDetails.maker == address(0),
+                "RoyaltyHate: hateRecoveryDetails.maker != address(0)"
+            );
 
-        /// @dev Make sure the caller is the maker and that they haven't already recovered.
-        if (sender == $maker && hateRecoveryDetails.maker == address(0)) {
-            hateRecoveryDetails.maker = sender;
+            hateRecoveryDetails.maker = msg.sender;
 
             /// @dev Transfer the assets back to the maker.
             uint256 value = hateDetails.makerDetails.value;
             if (value > 0) _transferETH($maker, value);
 
             _transferFrom(address(this), $maker, hateDetails.makerDetails);
+
+            /// @dev Announce the event for the indexer.
+            emit RoyaltyHateHelpers.RecoverRoyaltyHate(msg.sender, hateDetails);
         }
 
-        /// @dev Make sure the caller is the taker and that they haven't already recovered.
-        if (
-            sender == hateDetails.taker &&
-            hateRecoveryDetails.taker == address(0)
-        ) {
-            hateRecoveryDetails.taker = sender;
+        /// @dev Allow a taker to recover their assets.
+        if (msg.sender == hateDetails.taker) {
+            /// @dev Make sure the taker hasn't already recovered.
+            require(
+                hateRecoveryDetails.taker == address(0),
+                "RoyaltyHate: hateRecoveryDetails.taker != address(0)"
+            );
+
+            hateRecoveryDetails.taker = msg.sender;
 
             /// @dev Transfer the assets back to the taker.
             uint256 value = hateDetails.makerDetails.value;
@@ -239,6 +254,23 @@ contract RoyaltyHateEscrow is
                 hateDetails.taker,
                 hateDetails.takerDetails
             );
+
+            /// @dev Announce the event for the indexer.
+            emit RoyaltyHateHelpers.RecoverRoyaltyHate(msg.sender, hateDetails);
         }
+    }
+
+    /// @notice Enables the ability to simply read the nested mapping of details.
+    /// @param $maker The address of the maker.
+    /// @param $nonce The nonce of the maker.
+    function details(
+        address $maker,
+        uint32 $nonce
+    )
+        external
+        view
+        returns (RoyaltyHateHelpers.MakerRoyaltyHateDetails memory)
+    {
+        return addressToNonceToHateDetails[$maker][$nonce];
     }
 }

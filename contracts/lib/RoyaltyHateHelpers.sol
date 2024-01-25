@@ -3,10 +3,6 @@
 pragma solidity ^0.8.20;
 
 library RoyaltyHateHelpers {
-    /// @notice The address of the router.
-    address internal constant ROUTER =
-        0x00000000002Fd5Aeb385D324B580FCa7c83823A0;
-
     enum RoyaltyHateState {
         made,
         cancelled,
@@ -66,24 +62,11 @@ library RoyaltyHateHelpers {
     event TakeRoyaltyHate(
         address indexed maker,
         address indexed taker,
-        RoyaltyHateDetails details
+        MakerRoyaltyHateDetails details
     );
 
-    /// @notice Recover the sender from the multicaller, otherwise use the sender.
-    /// @dev Yoinked from https://github.com/Vectorized/multicaller/blob/main/src/LibMulticaller.sol#L63-L80
-    function sender() internal view returns (address result) {
-        /// @solidity memory-safe-assembly
-        assembly {
-            mstore(0x00, caller())
-            let withSender := ROUTER
-            if eq(caller(), withSender) {
-                if iszero(
-                    staticcall(gas(), withSender, codesize(), 0x00, 0x00, 0x20)
-                ) {
-                    revert(codesize(), codesize()) // For better gas estimation.
-                }
-            }
-            result := mload(0x00)
-        }
-    }
+    event RecoverRoyaltyHate(
+        address indexed taker,
+        MakerRoyaltyHateDetails details
+    );
 }
