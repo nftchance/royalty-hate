@@ -1,6 +1,6 @@
 # Royalty Hate
 
-This project demonstrates a very simple way to bypass [Rari Chains](https://rarichain.org/) ["Royalty Mechanism"](https://rari.docs.caldera.dev/royalty#defining-an-nft-sale) with a simple escrow contract.
+This project demonstrates a very simple way to bypass [Rari Chains](https://rarichain.org/) ["Royalty Mechanism"](https://rari.docs.caldera.dev/royalty#defining-an-nft-sale) with a simple escrow contract, or a single token wrapping contract, or even a multi-token wrapping contract.
 
 This contract utilizes standard Solidity and does not break any assumptions held on the blockchain, in general or on Rari Chain. Instead, the Rari Foundation simply hasn't been honest about the state of development nor the "benefits" of the chain they have developed.
 
