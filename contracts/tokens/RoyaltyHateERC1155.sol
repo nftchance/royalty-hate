@@ -7,8 +7,6 @@ import {ReentrancyGuard} from "solady/src/utils/ReentrancyGuard.sol";
 import {ERC1155} from "solady/src/tokens/ERC1155.sol";
 
 contract RoyaltyHateERC1155 is ERC1155, ReentrancyGuard {
-    string public constant prefix = "Royalty Hate: ";
-
     /// @notice The underlying token.
     ERC1155 public immutable underlying;
 

@@ -27,11 +27,18 @@ contract RoyaltyHateTransfers {
         RoyaltyHateHelpers.RoyaltyHateDetails memory $hateDetails
     ) internal {
         for (uint256 i; i < $hateDetails.erc20.tokenAddresses.length; i++) {
-            ERC20($hateDetails.erc20.tokenAddresses[i]).transferFrom(
-                $sender,
-                $receiver,
-                $hateDetails.erc20.amounts[i]
-            );
+            if($sender == address(this)) {
+                ERC20($hateDetails.erc20.tokenAddresses[i]).transfer(
+                    $receiver,
+                    $hateDetails.erc20.amounts[i]
+                );
+            } else {
+                ERC20($hateDetails.erc20.tokenAddresses[i]).transferFrom(
+                    $sender,
+                    $receiver,
+                    $hateDetails.erc20.amounts[i]
+                );
+            }
         }
 
         for (uint256 i; i < $hateDetails.erc721.ids.length; i++) {

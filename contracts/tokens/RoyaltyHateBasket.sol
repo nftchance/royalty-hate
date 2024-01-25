@@ -73,7 +73,7 @@ contract RoyaltyHateBasket is RoyaltyHateTransfers, ERC721 {
 
     /// @dev Wrap and serve the symbol of the underlying token.
     function symbol() public view virtual override returns (string memory) {
-        return "RHATEB";
+        return "RHBASKET";
     }
 
     /// @dev Serve the existing tokenURI of the underlying token.
@@ -98,7 +98,7 @@ contract RoyaltyHateBasket is RoyaltyHateTransfers, ERC721 {
                                                 "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width='100%' height='100%' fill='black' />",
                                                 string(
                                                     abi.encodePacked(
-                                                        "<text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'>Basket #",
+                                                        "<text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' class='base'>Basket #",
                                                         Strings.toString(
                                                             $tokenId
                                                         ),

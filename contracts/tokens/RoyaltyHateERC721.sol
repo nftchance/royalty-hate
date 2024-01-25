@@ -7,8 +7,6 @@ import {ReentrancyGuard} from "solady/src/utils/ReentrancyGuard.sol";
 import {ERC721} from "solady/src/tokens/ERC721.sol";
 
 contract RoyaltyHateERC721 is ERC721, ReentrancyGuard {
-    string public constant prefix = "Royalty Hate: ";
-
     /// @notice The underlying token.
     ERC721 public immutable underlying;
 
@@ -65,12 +63,12 @@ contract RoyaltyHateERC721 is ERC721, ReentrancyGuard {
 
     /// @dev Wrap and serve the name of the underlying token.
     function name() public view virtual override returns (string memory) {
-        return string(abi.encodePacked(prefix, underlying.name()));
+        return string(abi.encodePacked("Royalty Hate: ", underlying.name()));
     }
 
     /// @dev Wrap and serve the symbol of the underlying token.
     function symbol() public view virtual override returns (string memory) {
-        return string(abi.encodePacked(prefix, underlying.symbol()));
+        return string(abi.encodePacked("RH", underlying.symbol()));
     }
 
     /// @dev Serve the existing tokenURI of the underlying token.
