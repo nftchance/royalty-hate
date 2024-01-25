@@ -4,12 +4,13 @@ pragma solidity ^0.8.20;
 
 library RoyaltyHateHelpers {
     /// @notice The address of the router.
-    address internal constant ROUTER = 0x00000000002Fd5Aeb385D324B580FCa7c83823A0;
-    
+    address internal constant ROUTER =
+        0x00000000002Fd5Aeb385D324B580FCa7c83823A0;
+
     enum RoyaltyHateState {
-        made, 
-        cancelled, 
-        taking, 
+        made,
+        cancelled,
+        taking,
         taken
     }
 
@@ -20,7 +21,6 @@ library RoyaltyHateHelpers {
 
     struct ERC721Details {
         address tokenAddress;
-        address[] to;
         uint256[] ids;
     }
 
@@ -30,19 +30,19 @@ library RoyaltyHateHelpers {
         uint256[] amounts;
     }
 
-    struct RoyaltyHateDetails { 
+    struct RoyaltyHateDetails {
         ERC20Details erc20;
         ERC721Details erc721;
         ERC1155Details erc1155;
         uint256 value;
     }
 
-    struct RoyaltyHateRecoveryDetails { 
+    struct RoyaltyHateRecoveryDetails {
         address maker;
         address taker;
     }
 
-    struct MakerRoyaltyHateDetails { 
+    struct MakerRoyaltyHateDetails {
         address taker;
         uint32 expiration;
         uint32 nonce;
@@ -77,7 +77,9 @@ library RoyaltyHateHelpers {
             mstore(0x00, caller())
             let withSender := ROUTER
             if eq(caller(), withSender) {
-                if iszero(staticcall(gas(), withSender, codesize(), 0x00, 0x00, 0x20)) {
+                if iszero(
+                    staticcall(gas(), withSender, codesize(), 0x00, 0x00, 0x20)
+                ) {
                     revert(codesize(), codesize()) // For better gas estimation.
                 }
             }

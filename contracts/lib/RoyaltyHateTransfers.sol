@@ -2,17 +2,17 @@
 
 pragma solidity ^0.8.20;
 
-import { RoyaltyHateHelpers } from "./RoyaltyHateHelpers.sol";
+import {RoyaltyHateHelpers} from "./RoyaltyHateHelpers.sol";
 
-import { ERC20 } from "solady/src/tokens/ERC20.sol";
-import { ERC721 } from "solady/src/tokens/ERC721.sol";
-import { ERC1155 } from "solady/src/tokens/ERC1155.sol";
+import {ERC20} from "solady/src/tokens/ERC20.sol";
+import {ERC721} from "solady/src/tokens/ERC721.sol";
+import {ERC1155} from "solady/src/tokens/ERC1155.sol";
 
 contract RoyaltyHateTransfers {
     /// @notice Transfer ETH to a receiver from this contract.
     /// @param $receiver The receiver of the ETH.
     /// @param $amount The amount of ETH to transfer.
-    function _transferETH(address $receiver, uint256 $amount) internal { 
+    function _transferETH(address $receiver, uint256 $amount) internal {
         (bool success, ) = $receiver.call{value: $amount}("");
         require(success, "RoyaltyHate: ETH transfer failed");
     }
@@ -25,29 +25,29 @@ contract RoyaltyHateTransfers {
         address $sender,
         address $receiver,
         RoyaltyHateHelpers.RoyaltyHateDetails memory $hateDetails
-    ) internal { 
-        for(uint256 i; i < $hateDetails.erc20.tokenAddresses.length; i++) { 
+    ) internal {
+        for (uint256 i; i < $hateDetails.erc20.tokenAddresses.length; i++) {
             ERC20($hateDetails.erc20.tokenAddresses[i]).transferFrom(
                 $sender,
-                $receiver, 
+                $receiver,
                 $hateDetails.erc20.amounts[i]
             );
         }
-        
-        for(uint256 i; i < $hateDetails.erc721.to.length; i++) { 
+
+        for (uint256 i; i < $hateDetails.erc721.ids.length; i++) {
             ERC721($hateDetails.erc721.tokenAddress).safeTransferFrom(
-                $sender, 
+                $sender,
                 $receiver,
                 $hateDetails.erc721.ids[i]
             );
         }
 
-        for(uint256 i; i < $hateDetails.erc1155.ids.length; i++) { 
+        for (uint256 i; i < $hateDetails.erc1155.ids.length; i++) {
             ERC1155($hateDetails.erc1155.tokenAddress).safeTransferFrom(
-                $sender, 
+                $sender,
                 $receiver,
-                $hateDetails.erc1155.ids[i], 
-                $hateDetails.erc1155.amounts[i], 
+                $hateDetails.erc1155.ids[i],
+                $hateDetails.erc1155.amounts[i],
                 ""
             );
         }
@@ -82,16 +82,6 @@ contract RoyaltyHateTransfers {
         uint256,
         bytes calldata
     ) external virtual returns (bytes4) {
-        return 0x150b7a02;
-    }
-
-    /// @notice Confirm the receipt of an 721 transfer.
-    /// @dev Legacy function.
-    function onERC721Received(
-        address,
-        uint256,
-        bytes calldata
-    ) external virtual returns (bytes4) {
-        return 0xf0b9e5ba;
+        return this.onERC721Received.selector;
     }
 }
